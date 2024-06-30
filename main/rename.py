@@ -1428,10 +1428,10 @@ async def change_index_sub(bot, msg):
 
     reply = msg.reply_to_message
     if not reply:
-        return await msg.reply_text("Please reply to a media file with the index command\nFormat: `/changeindex s-3 -n filename.mkv` (Subtitle)")
+        return await msg.reply_text("Please reply to a media file with the index command\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitle)")
 
-    if len(msg.command) < 3:
-        return await msg.reply_text("Please provide the index command with a filename\nFormat: `/changeindex s-3 -n filename.mkv` (Subtitle)")
+    if len(msg.command) < 4:  # Increased the length check to 4 to account for the "-n" flag and filename
+        return await msg.reply_text("Please provide the index command with a filename\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitle)")
 
     index_cmd = None
     output_filename = None
@@ -1477,7 +1477,7 @@ async def change_index_sub(bot, msg):
 
     ffmpeg_cmd.extend(['-c', 'copy', output_file, '-y'])
 
-    await sts.edit("💠 Changing indexing Subtitles... ⚡")
+    await sts.edit("💠 Changing indexing Subitles... ⚡")
     process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await process.communicate()
 
@@ -1515,7 +1515,7 @@ async def change_index_sub(bot, msg):
         await msg.reply_text(          
             f"┏📥 **File Name:** {output_filename}\n"
             f"┠💾 **Size:** {filesize_human}\n"
-            f"┠♻️ **Mode:** Change Index Subtitles\n"
+            f"┠♻️ **Mode:** Change Index\n"
             f"┗🚹 **Request User:** {msg.from_user.mention}\n\n"
             f"❄**File have been Sent in Bot PM!**"            
         )
@@ -1531,6 +1531,8 @@ async def change_index_sub(bot, msg):
             os.remove(output_file)
         except Exception as e:
             print(f"Error deleting files: {e}")
+
+
 
 if __name__ == '__main__':
     app = Client("my_bot", bot_token=BOT_TOKEN)
