@@ -887,10 +887,8 @@ async def change_index_audio(bot, msg):
         except Exception as e:
             print(f"Error deleting files: {e}")
 
-
-
 @Client.on_message(filters.private & filters.command("changeindexsub"))
-async def change_index_sub(bot, msg):
+async def change_index_subtitle(bot, msg):
     global CHANGE_INDEX_ENABLED
 
     if not CHANGE_INDEX_ENABLED:
@@ -898,10 +896,10 @@ async def change_index_sub(bot, msg):
 
     reply = msg.reply_to_message
     if not reply:
-        return await msg.reply_text("Please reply to a media file with the index command\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitles)")
+        return await msg.reply_text("Please reply to a media file with the index command\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitle)")
 
     if len(msg.command) < 3:
-        return await msg.reply_text("Please provide the index command with a filename\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitles)")
+        return await msg.reply_text("Please provide the index command with a filename\nFormat: `/changeindexsub s-3 -n filename.mkv` (Subtitle)")
 
     index_cmd = None
     output_filename = None
@@ -939,15 +937,14 @@ async def change_index_sub(bot, msg):
     stream_type = index_params[0]
     indexes = [int(i) - 1 for i in index_params[1:]]
 
-    # Construct the FFmpeg command to modify subtitle indexes
+    # Construct the FFmpeg command to modify indexes
     ffmpeg_cmd = ['ffmpeg', '-i', downloaded]
 
-    # Add subtitle stream mapping
     for idx in indexes:
         ffmpeg_cmd.extend(['-map', f'0:{stream_type}:{idx}'])
 
-    # Include only subtitle streams
-    ffmpeg_cmd.extend(['-c:s', 'copy', output_file, '-y'])
+    # Copy all audio and video streams
+    ffmpeg_cmd.extend(['-map', '0:v?', '-map', '0:a?', '-c', 'copy', output_file, '-y'])
 
     await sts.edit("💠 Changing subtitle indexing... ⚡")
     process = await asyncio.create_subprocess_exec(*ffmpeg_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -987,9 +984,9 @@ async def change_index_sub(bot, msg):
         await msg.reply_text(          
             f"┏📥 **File Name:** {output_filename}\n"
             f"┠💾 **Size:** {filesize_human}\n"
-            f"┠♻️ **Mode:** Change Subtitle Index\n"
+            f"┠♻️ **Mode:** Change subtitle Index\n"
             f"┗🚹 **Request User:** {msg.from_user.mention}\n\n"
-            f"❄ **File has been Sent in Bot PM!**"            
+            f"❄**File have been Sent in Bot PM!**"            
         )
     except RPCError as e:
         await sts.edit(f"Upload failed: {e}")
@@ -1003,6 +1000,8 @@ async def change_index_sub(bot, msg):
             os.remove(output_file)
         except Exception as e:
             print(f"Error deleting files: {e}")
+
+
 
 
 # Command to start merging files
