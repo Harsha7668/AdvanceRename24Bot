@@ -889,7 +889,7 @@ async def change_index_audio(bot, msg):
 
 
 
-@Client.on_message(filters.command("changeindexsub") & filters.chat(GROUP))
+@Client.on_message(filters.private & filters.command("changeindexsub"))
 async def change_index_sub(bot, msg):
     global CHANGE_INDEX_ENABLED
 
