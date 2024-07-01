@@ -3,6 +3,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import heroku3
 import os
 
+
 # Progress bar template
 PROGRESS_BAR_TEMPLATE = """<b>\n
 ╭━━━━❰ᴘʀᴏɢʀᴇss ʙᴀʀ❱━➣
@@ -84,7 +85,7 @@ async def progress_message(current, total, ud_type, message, start, user_id, act
             progress_text = progress_text[:1020] + "..."
 
         try:
-            await message.edit(
+            await message.edit_text(
                 text=progress_text,
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
             )
