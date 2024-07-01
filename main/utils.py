@@ -38,7 +38,14 @@ def humanbytes(size):
 async def progress_message(current, total, ud_type, message, start, user_id, action="#m"):
     now = time.time()
     diff = now - start
-    if round(diff % 5.00) == 0 or current == total:        
+    if round(diff % 5.00) == 0 or current == total:
+        # Debug statements to check values
+        print(f"Current: {current}, Total: {total}, Type: {ud_type}, Start: {start}, User ID: {user_id}, Action: {action}")
+        
+        if message is None:
+            print("Error: message object is None")
+            return
+
         percentage = current * 100 / total
         speed = current / diff
         elapsed_time = round(diff) * 1000
@@ -91,6 +98,26 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60      
     return "%d:%02d:%02d" % (hour, minutes, seconds)
+
+# Example usage
+async def example_usage():
+    current = 500000000  # Current bytes processed
+    total = 1000000000  # Total bytes to process
+    message = None  # Replace with actual message object
+    start = time.time()
+    user_id = 12345
+
+    await progress_message(current, total, "Renaming...", message, start, user_id, action="#rename")
+    await progress_message(current, total, "Changing Metadata...", message, start, user_id, action="#changemetadata")
+    await progress_message(current, total, "Changing Index Audio...", message, start, user_id, action="#changeindexaudio")
+    await progress_message(current, total, "Changing Index Sub...", message, start, user_id, action="#changeindexsub")
+    await progress_message(current, total, "Attaching Photo...", message, start, user_id, action="#attachphoto")
+    await progress_message(current, total, "Leeching...", message, start, user_id, action="#leech")
+    await progress_message(current, total, "Multi Task...", message, start, user_id, action="#multitask")
+    await progress_message(current, total, "Taking Screenshot...", message, start, user_id, action="#screenshots")
+    await progress_message(current, total, "Creating Sample Video...", message, start, user_id, action="#samplevideo")
+
+# To run the example usage, use asyncio.run(example_usage()) if running in a standalone script.
 
 # Define heroku_restart function
 async def heroku_restart():
