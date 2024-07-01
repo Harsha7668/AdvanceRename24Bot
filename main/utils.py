@@ -5,19 +5,25 @@ import os
 
 
 PROGRESS_BAR = """\n
-╭───[**🔅Progress Bar🔅**]───⍟
+╭───[**•SUNRISES 24 PROGRESS•**]───⍟
 │
-├<b>📁 : {1} | {2}</b>
+├<b>🔁 : {5}</b>
 │
-├<b>🚀 : {0}%</b>
+├<b>📁**Process** : {1} | {2}</b>
 │
-├<b>⚡ : {3}</b>
+├<b>🚀**Percent** : {0}%</b>
 │
-├<b>⏱️ : {4}</b>
+├<b>⚡**Speed** : {3}</b>
 │
-├<b>🔳 : {5}</b>
+├<b>⏱️**ETA** : {4}</b>
+│
 ╰─────────────────⍟"""
 
+
+import time
+import math
+from some_module import humanbytes, TimeFormatter  # assuming these are imported from your module
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton  # assuming you're using python-telegram-bot
 
 async def progress_message(current, total, ud_type, message, start):
     now = time.time()
@@ -33,8 +39,8 @@ async def progress_message(current, total, ud_type, message, start):
         estimated_total_time = TimeFormatter(estimated_total_time_ms)
 
         progress = "{0}{1}".format(
-            ''.join(["⬢" for i in range(math.floor(percentage / 5))]),
-            ''.join(["⬡" for i in range(20 - math.floor(percentage / 5))])
+            ''.join(["■" for i in range(math.floor(percentage / 5))]),
+            ''.join(["□" for i in range(20 - math.floor(percentage / 5))])
         )
         tmp = progress + f"\nProgress: {round(percentage, 2)}%\n{humanbytes(current)} of {humanbytes(total)}\nSpeed: {speed}\nETA: {estimated_total_time if estimated_total_time != '' else '0 s'}"
 
