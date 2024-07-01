@@ -60,7 +60,6 @@ async def progress_message(current, total, ud_type, message, start):
                     speed,
                     estimated_total_time if estimated_total_time != '' else '0 s'
                 ),
-                parse_mode="html",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
             )
         except Exception as e:
