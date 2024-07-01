@@ -1485,7 +1485,6 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str, medi
             print(f"Error deleting file: {e}")
         await sts.delete()"""
 
-
 @Client.on_message(filters.command("leech") & filters.chat(AUTH_USERS))
 async def linktofile(bot, msg: Message):
     reply = msg.reply_to_message
@@ -1525,14 +1524,12 @@ async def linktofile(bot, msg: Message):
 
         # Thumbnail handling
         thumbnail_path = f"{DOWNLOAD_LOCATION}/thumbnail_{msg.from_user.id}.jpg"
-        if not os.path.exists(thumbnail_path):
+        file_thumb = None
+        if media.thumbs:
             try:
                 file_thumb = await bot.download_media(media.thumbs[0].file_id, file_name=thumbnail_path)
             except Exception as e:
                 print(f"Error downloading thumbnail: {e}")
-                file_thumb = None
-        else:
-            file_thumb = thumbnail_path
 
         await edit_message(sts, "💠 Uploading...")
         c_time = time.time()
@@ -1597,14 +1594,12 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str, medi
 
     # Thumbnail handling
     thumbnail_path = f"{DOWNLOAD_LOCATION}/thumbnail_{msg.from_user.id}.jpg"
-    if not os.path.exists(thumbnail_path):
+    file_thumb = None
+    if media and media.thumbs:
         try:
             file_thumb = await bot.download_media(media.thumbs[0].file_id, file_name=thumbnail_path)
         except Exception as e:
             print(f"Error downloading thumbnail: {e}")
-            file_thumb = None
-    else:
-        file_thumb = thumbnail_path
 
     await edit_message(sts, "💠 Uploading...")
     c_time = time.time()
@@ -1629,6 +1624,7 @@ async def edit_message(message, new_text):
             await message.edit(new_text)
     except MessageNotModified:
         pass
+
         
  # Define restart_app command
 @Client.on_message(filters.command("restart") & filters.chat(AUTH_USERS))
