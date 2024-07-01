@@ -5,9 +5,9 @@ import os
 
 
 PROGRESS_BAR = """\n
-╭───[**•SUNRISES 24 PROGRESS•**]───⍟
+╭───[**•PROGRESS BAR•**]───⍟
 │
-├<b>🔁 : {5}</b>
+├<b>{5}</b>
 │
 ├<b>📁**Process** : {1} | {2}</b>
 │
