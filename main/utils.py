@@ -19,12 +19,6 @@ PROGRESS_BAR = """\n
 │
 ╰─────────────────⍟"""
 
-
-import time
-import math
-from some_module import humanbytes, TimeFormatter  # assuming these are imported from your module
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton  # assuming you're using python-telegram-bot
-
 async def progress_message(current, total, ud_type, message, start):
     now = time.time()
     diff = now - start
