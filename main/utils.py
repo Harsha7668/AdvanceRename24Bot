@@ -44,9 +44,12 @@ async def progress_message(current, total, ud_type, message, start):
     if round(diff % 5.00) == 0 or current == total:
         percentage = current * 100 / total
         speed = humanbytes(current / diff) + "/s"
-        elapsed_time = TimeFormatter(round(diff * 1000))
-        time_to_completion = round((total - current) / (current / diff)) * 1000
-        estimated_total_time = TimeFormatter(elapsed_time + time_to_completion)
+        elapsed_time_ms = round(diff * 1000)
+        time_to_completion_ms = round((total - current) / (current / diff)) * 1000
+        estimated_total_time_ms = elapsed_time_ms + time_to_completion_ms
+
+        elapsed_time = TimeFormatter(elapsed_time_ms)
+        estimated_total_time = TimeFormatter(estimated_total_time_ms)
 
         try:
             await message.edit(
@@ -60,8 +63,8 @@ async def progress_message(current, total, ud_type, message, start):
                 parse_mode="html",
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
             )
-        except:
-            pass
+        except Exception as e:
+            print(f"Error editing message: {e}")
 
 def convert(seconds):
     seconds = seconds % (24 * 3600)
@@ -70,7 +73,6 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60
     return "%d:%02d:%02d" % (hour, minutes, seconds)
-
 
 # Define heroku_restart function
 async def heroku_restart():
