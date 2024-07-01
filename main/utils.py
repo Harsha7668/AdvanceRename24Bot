@@ -4,7 +4,7 @@ import heroku3
 import os
 
 
-PROGRESS_BAR = """\n
+PROGRESS_BAR = """
 ╭───[**•PROGRESS BAR•**]───⍟
 │
 ├<b>{5}</b>
