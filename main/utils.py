@@ -4,22 +4,22 @@ import heroku3
 import os
 
 PROGRESS_BAR = """
-<b>
 ┏🏷️ 
-┠[{}{}] {}%
-┠🔄 Process: {} of {}
-┠✨ Status: {} | ETA: {}
-┠📶 Speed: {}/s | Elapsed: {}
-┠👤 User: {}
-</b>
+┠[■■■■■■■■▤□□□□] {0:.2f}%
+┠🔄 Process: {1} of {2} | ETA: {3}
+┠📶 Speed: {4}/s | Elapsed: {5}
 """
+
+import time
+import math
+from pyrogram import Client
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 def TimeFormatter(milliseconds: int) -> str:
     seconds, milliseconds = divmod(milliseconds, 1000)
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
-    days, hours = divmod(hours, 24)
-    return '{:02}:{:02}:{:02}'.format(hours, minutes, seconds)
+    return f"{hours}:{minutes}:{seconds}"
 
 def humanbytes(size):    
     if not size:
@@ -45,44 +45,27 @@ async def progress_message(current, total, ud_type, message, start):
         elapsed_time = TimeFormatter(milliseconds=elapsed_time)
         estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
 
-        progress = "{0}{1}".format(
-            ''.join(["■" for _ in range(math.floor(percentage / 5))]),
-            ''.join(["□" for _ in range(20 - math.floor(percentage / 5))])
+        progress = "[{0}{1}] {2:.2f}%".format(
+            ''.join(["■" for _ in range(math.floor(percentage / 10))]),
+            ''.join(["□" for _ in range(10 - math.floor(percentage / 10))]),
+            percentage
         )
-        
-        # Get username from message object
-        username = message.from_user.username if message.from_user.username else message.from_user.first_name
-        
-        # Format the progress bar message
-        progress_message = PROGRESS_BAR.format(
-            progress,
-            '',
-            round(percentage, 2),
-            humanbytes(current),
-            humanbytes(total),
-            ud_type,
-            estimated_total_time,
-            humanbytes(speed),
-            elapsed_time,
-            username
-        )
-        
-        if len(progress_message) > 1024:
-            progress_message = progress_message[:1020] + "..."
-        
+
         try:
             await message.edit(
-                text=progress_message,
-                parse_mode='HTML',
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
+                text=PROGRESS_BAR.format(
+                    percentage,
+                    humanbytes(current), 
+                    humanbytes(total), 
+                    estimated_total_time if estimated_total_time != '' else '0 s',
+                    humanbytes(speed),
+                    elapsed_time
+                ),               
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])                                               
             )
         except Exception as e:
             print(f"Error editing message: {e}")
 
-# Example usage:
-# Ensure you provide the correct parameters for current, total, ud_type, message, and start time.
-# Replace 'username' with the actual username.
-await progress_message(current=500, total=1000, ud_type='Download', message=message, start=time.time())
 
 
 # Define heroku_restart function
