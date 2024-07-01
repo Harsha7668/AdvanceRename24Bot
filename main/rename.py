@@ -1485,6 +1485,7 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str, medi
             print(f"Error deleting file: {e}")
         await sts.delete()"""
 
+
 @Client.on_message(filters.command("leech") & filters.chat(AUTH_USERS))
 async def linktofile(bot, msg: Message):
     reply = msg.reply_to_message
@@ -1500,7 +1501,7 @@ async def linktofile(bot, msg: Message):
         return await msg.reply_text("Please reply to a valid file, video, audio, or link with the desired filename and extension (e.g., `.mkv`, `.mp4`, `.zip`).")
 
     if reply.text and ("seedr" in reply.text or "workers" in reply.text):
-        await handle_link_download(bot, msg, reply.text, new_name)
+        await handle_link_download(bot, msg, reply.text, new_name, media)
     else:
         if not media:
             return await msg.reply_text("Please reply to a valid file, video, audio, or link with the desired filename and extension (e.g., `.mkv`, `.mp4`, `.zip`).")
@@ -1524,12 +1525,14 @@ async def linktofile(bot, msg: Message):
 
         # Thumbnail handling
         thumbnail_path = f"{DOWNLOAD_LOCATION}/thumbnail_{msg.from_user.id}.jpg"
-        file_thumb = None
-        if hasattr(media, 'thumbs') and media.thumbs:
+        if not os.path.exists(thumbnail_path):
             try:
                 file_thumb = await bot.download_media(media.thumbs[0].file_id, file_name=thumbnail_path)
             except Exception as e:
                 print(f"Error downloading thumbnail: {e}")
+                file_thumb = None
+        else:
+            file_thumb = thumbnail_path
 
         await edit_message(sts, "💠 Uploading...")
         c_time = time.time()
@@ -1567,7 +1570,7 @@ async def linktofile(bot, msg: Message):
                 print(f"Error deleting files: {e}")
             await sts.delete()
 
-async def handle_link_download(bot, msg: Message, link: str, new_name: str):
+async def handle_link_download(bot, msg: Message, link: str, new_name: str, media):
     sts = await msg.reply_text("🚀 Downloading from link...")
     c_time = time.time()
 
@@ -1594,7 +1597,14 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str):
 
     # Thumbnail handling
     thumbnail_path = f"{DOWNLOAD_LOCATION}/thumbnail_{msg.from_user.id}.jpg"
-    file_thumb = None
+    if not os.path.exists(thumbnail_path):
+        try:
+            file_thumb = await bot.download_media(media.thumbs[0].file_id, file_name=thumbnail_path)
+        except Exception as e:
+            print(f"Error downloading thumbnail: {e}")
+            file_thumb = None
+    else:
+        file_thumb = thumbnail_path
 
     await edit_message(sts, "💠 Uploading...")
     c_time = time.time()
@@ -1619,7 +1629,6 @@ async def edit_message(message, new_text):
             await message.edit(new_text)
     except MessageNotModified:
         pass
-
         
  # Define restart_app command
 @Client.on_message(filters.command("restart") & filters.chat(AUTH_USERS))
