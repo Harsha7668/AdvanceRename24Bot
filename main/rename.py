@@ -1487,6 +1487,8 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str, medi
 
 
 
+
+
 @Client.on_message(filters.command("leech") & filters.chat(AUTH_USERS))
 async def linktofile(bot, msg: Message):
     reply = msg.reply_to_message
@@ -1624,6 +1626,8 @@ async def handle_link_download(bot, msg: Message, link: str, new_name: str, medi
             print(f"Error deleting file: {e}")
         await sts.delete()
         
+
+
         
  # Define restart_app command
 @Client.on_message(filters.command("restart") & filters.chat(AUTH_USERS))
