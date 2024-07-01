@@ -1,8 +1,10 @@
 import math, time
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 import heroku3
 import os
 
+
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Progress bar template
 PROGRESS_BAR_TEMPLATE = """<b>\n
