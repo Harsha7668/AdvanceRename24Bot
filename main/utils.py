@@ -3,58 +3,17 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import heroku3
 import os
 
-PROGRESS_BAR = """
-┏🏷️ 
-┠{0} {1:.2f}%
-┠🔄 Process: {2} of {3} | ETA: {4}
-┠📶 Speed: {5} | Elapsed: {6}
-"""
-
-async def progress_message(current, total, ud_type, message, start):
-
-    now = time.time()
-    diff = now - start
-    if round(diff % 10.00) == 0 or current == total:
-        percentage = current * 100 / total
-        speed = current / diff
-        elapsed_time = round(diff) * 1000
-        time_to_completion = round((total - current) / speed) * 1000
-        estimated_total_time = elapsed_time + time_to_completion
-
-        elapsed_time_str = convert(round(diff))
-        estimated_total_time_str = TimeFormatter(estimated_total_time)
-
-        progress = "[{0}{1}]".format(
-            ''.join(["■" for _ in range(math.floor(percentage / 10))]),
-            ''.join(["□" for _ in range(10 - math.floor(percentage / 10))]),
-        )
-
-        try:
-            await message.edit(
-                text=PROGRESS_BAR.format(
-                    progress,
-                    percentage,
-                    humanbytes(current),
-                    humanbytes(total),
-                    estimated_total_time_str if estimated_total_time_str != '' else '0 s',
-                    f"{speed:.2f} MB/s",  # Adjust speed format here
-                    elapsed_time_str
-                ),
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ 𝙲𝙰𝙽𝙲𝙴𝙻 ✖️", callback_data="cancel")]])
-            )
-        except Exception as e:
-            print(f"Error editing message: {e}")
-
-def humanbytes(size):
-    if not size:
-        return ""
-    power = 2**10
-    n = 0
-    Dic_powerN = {0: ' ', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
-    while size > power:
-        size /= power
-        n += 1
-    return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
+PROGRESS_BAR = """\n
+╭───[**🔅Progress Bar🔅**]───⍟
+│
+├<b>📁 : {1} | {2}</b>
+│
+├<b>🚀 : {0}%</b>
+│
+├<b>⚡ : {3}</b>
+│
+├<b>⏱️ : {4}</b>
+╰─────────────────⍟"""
 
 def TimeFormatter(milliseconds: int) -> str:
     seconds, milliseconds = divmod(milliseconds, 1000)
@@ -68,6 +27,42 @@ def TimeFormatter(milliseconds: int) -> str:
           ((str(milliseconds) + "ms, ") if milliseconds else "")
     return tmp[:-2]
 
+def humanbytes(size):
+    if not size:
+        return ""
+    power = 2**10
+    n = 0
+    Dic_powerN = {0: ' ', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+    while size > power:
+        size /= power
+        n += 1
+    return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
+
+async def progress_message(current, total, ud_type, message, start):
+    now = time.time()
+    diff = now - start
+    if round(diff % 5.00) == 0 or current == total:
+        percentage = current * 100 / total
+        speed = humanbytes(current / diff) + "/s"
+        elapsed_time = TimeFormatter(round(diff * 1000))
+        time_to_completion = round((total - current) / (current / diff)) * 1000
+        estimated_total_time = TimeFormatter(elapsed_time + time_to_completion)
+
+        try:
+            await message.edit(
+                text=f"{ud_type}\n\n" + PROGRESS_BAR.format(
+                    round(percentage, 2),
+                    humanbytes(current),
+                    humanbytes(total),
+                    speed,
+                    estimated_total_time if estimated_total_time != '' else '0 s'
+                ),
+                parse_mode="html",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
+            )
+        except:
+            pass
+
 def convert(seconds):
     seconds = seconds % (24 * 3600)
     hour = seconds // 3600
@@ -75,8 +70,6 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60
     return "%d:%02d:%02d" % (hour, minutes, seconds)
-    
-
 
 
 # Define heroku_restart function
