@@ -9,11 +9,11 @@ PROGRESS_BAR = """
 │
 ├<b>{5}</b>
 │
-├<b>📁**Process** : {1} | {2}</b>
+├<b>📁**PROCESS** : {1} | {2}</b>
 │
-├<b>🚀**Percent** : {0}%</b>
+├<b>🚀**PERCENT** : {0}%</b>
 │
-├<b>⚡**Speed** : {3}</b>
+├<b>⚡**SPEED** : {3}</b>
 │
 ├<b>⏱️**ETA** : {4}</b>
 │
