@@ -3,8 +3,8 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import heroku3
 import os
 
-
-PROGRESS_BAR = """<b>\n
+# Progress bar template
+PROGRESS_BAR_TEMPLATE = """<b>\n
 ╭━━━━❰ᴘʀᴏɢʀᴇss ʙᴀʀ❱━➣
 ┣⪼ 🗃️ Sɪᴢᴇ: {1} | {2}
 ┣⪼ ⏳️ Dᴏɴᴇ : {0}%
@@ -35,7 +35,7 @@ def humanbytes(size):
         n += 1
     return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
 
-async def progress_message(current, total, ud_type, message, start):
+async def progress_message(current, total, ud_type, message, start, user_id, action="#m"):
     now = time.time()
     diff = now - start
     if round(diff % 5.00) == 0 or current == total:        
@@ -49,21 +49,40 @@ async def progress_message(current, total, ud_type, message, start):
         estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
 
         progress = "{0}{1}".format(
-            ''.join(["⬢" for i in range(math.floor(percentage / 5))]),
-            ''.join(["⬡" for i in range(20 - math.floor(percentage / 5))])
-        )            
-        tmp = progress + f"\nProgress: {round(percentage, 2)}%\n{humanbytes(current)} of {humanbytes(total)}\nSpeed: {humanbytes(speed)}/s\nETA: {estimated_total_time if estimated_total_time != '' else '0 s'}"
+            ''.join(["⬢" for i in range(math.floor(percentage / 8.33))]),
+            ''.join(["⬡" for i in range(12 - math.floor(percentage / 8.33))])
+        )
+
+        if "Download" in ud_type:
+            status = "Downloading"
+        else:
+            status = "Uploading"
         
-        if len(tmp) > 1024:  # Split message if it exceeds Telegram limit
-            tmp = tmp[:1020] + "..."
+        progress_text = (
+            f"{ud_type}\n"
+            f"┌ {status}...\n"
+            f"├ {progress}\n"
+            f"├ Progress: {round(percentage, 2)}%\n"
+            f"├ Processed: {humanbytes(current)}\n"
+            f"├ Total Size: {humanbytes(total)}\n"
+            f"├ Speed: {humanbytes(speed)}/s\n"
+            f"├ ETA: {estimated_total_time if estimated_total_time != '' else '0 s'}\n"
+            f"├ Elapsed: {elapsed_time}\n"
+            f"├ By: {user_id}\n"
+            f"├ Action: {action}\n"
+            f"└ /cancel1 EDEZ4fa6"
+        )
+
+        if len(progress_text) > 1024:  # Split message if it exceeds Telegram limit
+            progress_text = progress_text[:1020] + "..."
 
         try:
             await message.edit(
-                text=f"{ud_type}\n\n{tmp}",               
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])                                               
+                text=progress_text,
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
             )
-        except:
-            pass
+        except Exception as e:
+            print(f"Error: {e}")
 
 def convert(seconds):
     seconds = seconds % (24 * 3600)
@@ -72,7 +91,6 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60      
     return "%d:%02d:%02d" % (hour, minutes, seconds)
-
 
 # Define heroku_restart function
 async def heroku_restart():
