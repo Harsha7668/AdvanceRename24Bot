@@ -2,20 +2,16 @@ import math, time
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import heroku3
 import os
-import asyncio
 
-
-
-PROGRESS_BAR_TEMPLATE = """
-┏🏷️ Name: {filename}
-┠[{progress_bar}] {percentage:.2f}%
-┠🔄 Process: {current_size} of {total_size}
-┠✨ Status: {status} | ETA: {eta}
-┠📶 Speed: {speed}/s | Elapsed: {elapsed_time}
-┠💠 Mode: {mode}
-┠👤 User: {user}
-┠🆔 ID: {user_id}
-┗🚫 Stop: /cancel1_{task_id}
+PROGRESS_BAR = """
+<b>
+┏🏷️ 
+┠[{}{}] {}%
+┠🔄 Process: {} of {}
+┠✨ Status: {} | ETA: {}
+┠📶 Speed: {}/s | Elapsed: {}
+┠👤 User: {}
+</b>
 """
 
 def TimeFormatter(milliseconds: int) -> str:
@@ -23,12 +19,7 @@ def TimeFormatter(milliseconds: int) -> str:
     minutes, seconds = divmod(seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
-    tmp = ((str(days) + "d, ") if days else "") + \
-          ((str(hours) + "h, ") if hours else "") + \
-          ((str(minutes) + "m, ") if minutes else "") + \
-          ((str(seconds) + "s, ") if seconds else "") + \
-          ((str(milliseconds) + "ms, ") if milliseconds else "")
-    return tmp[:-2]
+    return '{:02}:{:02}:{:02}'.format(hours, minutes, seconds)
 
 def humanbytes(size):    
     if not size:
@@ -41,7 +32,7 @@ def humanbytes(size):
         n += 1
     return str(round(size, 2)) + " " + Dic_powerN[n] + 'B'
 
-async def progress_message(current, total, ud_type, message, start, user_id, filename, mode, status="Download", user="username", task_id=""):
+async def progress_message(current, total, ud_type, message, start):
     now = time.time()
     diff = now - start
     if round(diff % 5.00) == 0 or current == total:        
@@ -54,45 +45,44 @@ async def progress_message(current, total, ud_type, message, start, user_id, fil
         elapsed_time = TimeFormatter(milliseconds=elapsed_time)
         estimated_total_time = TimeFormatter(milliseconds=estimated_total_time)
 
-        progress_bar = "{0}{1}".format(
-            ''.join(["■" for i in range(math.floor(percentage / 10))]),
-            ''.join(["□" for i in range(10 - math.floor(percentage / 10))])
+        progress = "{0}{1}".format(
+            ''.join(["■" for _ in range(math.floor(percentage / 5))]),
+            ''.join(["□" for _ in range(20 - math.floor(percentage / 5))])
         )
-
-        progress_message = PROGRESS_BAR_TEMPLATE.format(
-            filename=filename,
-            progress_bar=progress_bar,
-            percentage=percentage,
-            current_size=humanbytes(current),
-            total_size=humanbytes(total),
-            status=status,
-            eta=estimated_total_time if estimated_total_time != '' else '0 s',
-            speed=humanbytes(speed),
-            elapsed_time=elapsed_time,
-            mode=mode,
-            user=user,
-            user_id=user_id,
-            task_id=task_id
+        
+        # Get username from message object
+        username = message.from_user.username if message.from_user.username else message.from_user.first_name
+        
+        # Format the progress bar message
+        progress_message = PROGRESS_BAR.format(
+            progress,
+            '',
+            round(percentage, 2),
+            humanbytes(current),
+            humanbytes(total),
+            ud_type,
+            estimated_total_time,
+            humanbytes(speed),
+            elapsed_time,
+            username
         )
-
+        
+        if len(progress_message) > 1024:
+            progress_message = progress_message[:1020] + "..."
+        
         try:
-            await message.edit_text(
-                text=f"{ud_type}\n\n{progress_message}\n\nMSG from user id: {user_id}",  # Include user mention here
-                reply_markup=InlineKeyboardMarkup(
-                    [[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data=f"close_{task_id}")]]
-                )
+            await message.edit(
+                text=progress_message,
+                parse_mode='HTML',
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("✖️ CANCEL ✖️", callback_data="close")]])
             )
-        except:
-            pass
+        except Exception as e:
+            print(f"Error editing message: {e}")
 
-def convert(seconds):
-    seconds = seconds % (24 * 3600)
-    hour = seconds // 3600
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60      
-    return "%d:%02d:%02d" % (hour, minutes, seconds)
-
+# Example usage:
+# Ensure you provide the correct parameters for current, total, ud_type, message, and start time.
+# Replace 'username' with the actual username.
+await progress_message(current=500, total=1000, ud_type='Download', message=message, start=time.time())
 
 
 # Define heroku_restart function
